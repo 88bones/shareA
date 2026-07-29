@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -27,8 +28,8 @@ const Home = () => {
         className="w-full md:w-fit px-4 py-2 rounded-md drop-shadow-lg drop-shadow-mint bg-mint/90 group"
         onClick={handleRoomStart}
       >
-        <button className="text-white group-hover:cursor-pointer">
-          shareA session{" "}
+        <button className="text-white group-hover:cursor-pointer flex items-center gap-2">
+          shareA <ArrowRight size={18} />
         </button>
       </div>
     </div>
