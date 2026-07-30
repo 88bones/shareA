@@ -1,5 +1,6 @@
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import Button from "../ui/Button";
 import { Share2 } from "lucide-react";
 
 const NavBar = () => {
@@ -22,16 +23,15 @@ const NavBar = () => {
       <div className="flex gap-4 text-white text-sm items-center">
         {location.pathname === "/" ? (
           headers.map((header) => (
-            <p className="" key={header.name}>
+            <p
+              className="relative transition-all cursor-pointer after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-white after:transition-all after:duration-300 ease-in-out hover:after:w-full"
+              key={header.name}
+            >
               <a href={header.path}>{header.name}</a>
             </p>
           ))
         ) : (
-          <div className="w-full md:w-fit px-4 py-1 rounded-md drop-shadow-lg drop-shadow-mint bg-mint/90 group">
-            <button className="text-white group-hover:cursor-pointer flex gap-2 items-center">
-              Share <Share2 size={18} />
-            </button>
-          </div>
+          <Button icon={Share2} label={"Share"} onClick={() => navigate("/")} />
         )}
       </div>
     </div>

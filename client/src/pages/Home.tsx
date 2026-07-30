@@ -1,6 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Button from "../components/ui//Button";
 
 const Home = () => {
   const [params, setParams] = useState<string>();
@@ -24,14 +25,11 @@ const Home = () => {
           setup, no sign-up required to join
         </h3>
       </header>
-      <div
-        className="w-full md:w-fit px-4 py-2 rounded-md drop-shadow-lg drop-shadow-mint bg-mint/90 group"
-        onClick={handleRoomStart}
-      >
-        <button className="text-white group-hover:cursor-pointer flex items-center gap-2">
-          shareA <ArrowRight size={18} />
-        </button>
-      </div>
+      <Button
+        icon={ArrowRight}
+        label={"Start a room"}
+        onClick={() => handleRoomStart()}
+      ></Button>
     </div>
   );
 };
