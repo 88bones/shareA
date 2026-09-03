@@ -4,9 +4,15 @@ import { Server } from "socket.io";
 
 const app = express();
 const port = process.env.PORT || 3000;
-const clientOrigins = (process.env.CLIENT_URL || "http://localhost:5173")
+const configuredOrigins = (process.env.CLIENT_URL || "")
   .split(",")
-  .map((origin) => origin.trim());
+  .map((origin) => origin.trim().replace(/\/$/, ""))
+  .filter(Boolean);
+const clientOrigins = [
+  "http://localhost:5173",
+  "https://sharea-iota.vercel.app",
+  ...configuredOrigins,
+];
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
