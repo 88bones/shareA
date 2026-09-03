@@ -4,10 +4,13 @@ import { Server } from "socket.io";
 
 const app = express();
 const port = process.env.PORT || 3000;
+const clientOrigins = (process.env.CLIENT_URL || "http://localhost:5173")
+  .split(",")
+  .map((origin) => origin.trim());
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: clientOrigins,
   },
 });
 
