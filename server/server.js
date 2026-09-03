@@ -3,11 +3,16 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 
 const app = express();
+const port = process.env.PORT || 3000;
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
     origin: process.env.CLIENT_URL || "http://localhost:5173",
   },
+});
+
+app.get("/", (_request, response) => {
+  response.send("Socket server is running");
 });
 
 io.on("connection", (socket) => {
@@ -18,6 +23,6 @@ io.on("connection", (socket) => {
   });
 });
 
-httpServer.listen(3000, () => {
-  console.log("Connected in port 3000");
+httpServer.listen(port, () => {
+  console.log(`Connected on port ${port}`);
 });
