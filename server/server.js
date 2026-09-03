@@ -25,10 +25,16 @@ app.get("/", (_request, response) => {
 });
 
 io.on("connection", (socket) => {
-  console.log("user connected<server>:", socket.id);
+  socket.on("joinRoom", (roomId) => {
+    socket.join(roomId);
+  });
 
-  socket.on("updateText", (data) => {
-    socket.broadcast.emit("updateText", data);
+  socket.on("leaveRoom", (roomId) => {
+    socket.leave(roomId);
+  });
+
+  socket.on("updateText", ({ roomId, text }) => {
+    socket.to(roomId).emit("updateText", text);
   });
 });
 

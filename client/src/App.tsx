@@ -28,6 +28,10 @@ function App() {
       console.log("Disconnected");
     });
 
+    socket.on("connect_error", (error) => {
+      console.error("Socket connection failed:", error.message);
+    });
+
     socket.on("updateText", (newText: string) => {
       setText(newText);
     });
@@ -35,6 +39,7 @@ function App() {
     return () => {
       socket.off("connect");
       socket.off("disconnect");
+      socket.off("connect_error");
       socket.off("updateText");
       socket.disconnect();
     };
