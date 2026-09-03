@@ -1,4 +1,3 @@
-import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Button from "../ui/Button";
 import { Share2 } from "lucide-react";

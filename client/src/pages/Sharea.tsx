@@ -1,14 +1,17 @@
-import { Trash, X } from "lucide-react";
-import React, { useState } from "react";
-import { useParams } from "react-router-dom";
+import { Trash } from "lucide-react";
+import React from "react";
+import { socket } from "../libs/socket";
 
-const Sharea = () => {
-  const { params } = useParams();
-  // console.log(params);
+interface ShareaProps {
+  text: string;
+  setText: React.Dispatch<React.SetStateAction<string>>;
+}
 
-  const [text, setText] = useState<string>("");
+const Sharea: React.FC<ShareaProps> = ({ text, setText }) => {
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setText(e.target.value);
+    const newText = e.target.value;
+    setText(newText);
+    socket.emit("updateText", newText);
   };
 
   return (

@@ -3,7 +3,7 @@ import "./App.css";
 import NavBar from "./components/layout/NavBar";
 import Home from "./pages/Home";
 import Sharea from "./pages/Sharea";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { socket } from "./libs/socket";
 
 function AppWrapper() {
@@ -17,10 +17,6 @@ function AppWrapper() {
 function App() {
   const [text, setText] = useState<string>("");
 
-  const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setText(e.target.value);
-  };
-
   useEffect(() => {
     socket.connect();
 
@@ -32,9 +28,15 @@ function App() {
       console.log("Disconnected");
     });
 
+    socket.on("updateText", (newText: string) => {
+      setText(newText);
+    });
+
     return () => {
       socket.off("connect");
       socket.off("disconnect");
+      socket.off("updateText");
+      socket.disconnect();
     };
   }, []);
 
@@ -44,7 +46,10 @@ function App() {
 
       <Routes>
         <Route path="/" element={<Home />}></Route>
-        <Route path="/room/:params" element={<Sharea />}></Route>
+        <Route
+          path="/room/:params"
+          element={<Sharea text={text} setText={setText} />}
+        ></Route>
       </Routes>
     </div>
   );

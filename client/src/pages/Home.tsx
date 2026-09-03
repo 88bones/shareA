@@ -1,16 +1,12 @@
 import { ArrowRight } from "lucide-react";
-import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "../components/ui//Button";
 
 const Home = () => {
-  const [params, setParams] = useState<string>();
-
   const navigate = useNavigate();
 
   const handleRoomStart = () => {
     const roomId = Math.floor(Math.random() * 1000000).toString();
-    setParams(roomId);
     navigate(`/room/${roomId}`);
   };
 

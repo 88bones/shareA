@@ -6,12 +6,16 @@ const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: process.env.CLIENT_URL || "http://localhost:5173",
   },
 });
 
 io.on("connection", (socket) => {
-  console.log("user connected:", socket.id);
+  console.log("user connected<server>:", socket.id);
+
+  socket.on("updateText", (data) => {
+    socket.broadcast.emit("updateText", data);
+  });
 });
 
 httpServer.listen(3000, () => {
