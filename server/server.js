@@ -25,7 +25,8 @@ app.get("/", (_request, response) => {
 });
 
 io.on("connection", (socket) => {
-  socket.on("joinRoom", (roomId) => {
+  socket.on("joinRoom", ({ roomId, userId }) => {
+    socket.data.userId = userId;
     socket.join(roomId);
   });
 
@@ -34,7 +35,9 @@ io.on("connection", (socket) => {
   });
 
   socket.on("updateText", ({ roomId, text }) => {
-    socket.to(roomId).emit("updateText", text);
+    socket.to(roomId).emit("updateText", {
+      text,
+    });
   });
 });
 
