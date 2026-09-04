@@ -2,6 +2,7 @@ import { ArrowRight, DoorOpen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Button from "../components/ui//Button";
 import { useState } from "react";
+import { getUserId } from "../libs/socket";
 
 const Home = () => {
   const [visible, setVisible] = useState(false);
@@ -11,7 +12,9 @@ const Home = () => {
 
   const handleRoomStart = () => {
     const roomId = Math.floor(Math.random() * 1000000).toString();
-    navigate(`/room/${roomId}`);
+    navigate(`/room/${roomId}/`, {
+      state: { userId: getUserId() },
+    });
   };
 
   console.log(roomID);
@@ -56,7 +59,9 @@ const Home = () => {
             icon={ArrowRight}
             label="Join Room"
             onClick={() => {
-              navigate(`/room/${roomID}`);
+              navigate(`/room/${roomID}`, {
+                state: { userId: getUserId() },
+              });
             }}
           ></Button>
         </div>

@@ -1,7 +1,7 @@
 import { Trash } from "lucide-react";
 import React, { useEffect } from "react";
-import { useParams } from "react-router-dom";
-import { socket } from "../libs/socket";
+import { useLocation, useParams } from "react-router-dom";
+import { getUserId, socket } from "../libs/socket";
 
 interface ShareaProps {
   text: string;
@@ -11,15 +11,20 @@ interface ShareaProps {
 const Sharea: React.FC<ShareaProps> = ({ text, setText }) => {
   const { params: roomId } = useParams();
 
+  const location = useLocation();
+  const userId = location.state?.userId ?? getUserId();
+  console.log(userId);
+
   useEffect(() => {
     if (!roomId) return;
+    if (!userId) return;
 
-    socket.emit("joinRoom", roomId);
+    socket.emit("joinRoom", { roomId, userId });
 
     return () => {
       socket.emit("leaveRoom", roomId);
     };
-  }, [roomId]);
+  }, [roomId, userId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newText = e.target.value;
