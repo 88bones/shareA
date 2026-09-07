@@ -2,18 +2,19 @@ import { Trash } from "lucide-react";
 import React, { useEffect } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { getUserId, socket } from "../libs/socket";
+import CodeEditor from "../components/layout/CodeEditor";
 
 interface ShareaProps {
   text: string;
   setText: React.Dispatch<React.SetStateAction<string>>;
+  userCount: number;
 }
 
-const Sharea: React.FC<ShareaProps> = ({ text, setText }) => {
+const Sharea: React.FC<ShareaProps> = ({ text, setText, userCount }) => {
   const { params: roomId } = useParams();
 
   const location = useLocation();
   const userId = location.state?.userId ?? getUserId();
-  console.log(userId);
 
   useEffect(() => {
     if (!roomId) return;
@@ -26,8 +27,7 @@ const Sharea: React.FC<ShareaProps> = ({ text, setText }) => {
     };
   }, [roomId, userId]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newText = e.target.value;
+  const handleChange = (newText: string) => {
     setText(newText);
     socket.emit("updateText", { roomId, text: newText });
   };
@@ -39,11 +39,15 @@ const Sharea: React.FC<ShareaProps> = ({ text, setText }) => {
 
   return (
     <div className="overflow-x-hidden relative">
-      <textarea
-        value={text}
+      <div className="text-white text-xs absolute top-4 right-2 z-10 bg-mint px-3 py-1 rounded-full shadow-lg shadow-teal">
+        {userCount} {userCount === 1 ? "user" : "users"} in room
+      </div>
+
+      <CodeEditor
+        text={text}
         onChange={handleChange}
-        placeholder="Type your text here..."
-        className="w-full px-4 border border-r-4 border-white rounded text-white font-light min-h-dvh bg-cyan"
+        roomId={roomId}
+        userId={userId}
       />
 
       <div
