@@ -2,6 +2,7 @@ import { Trash } from "lucide-react";
 import React, { useEffect } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { getUserId, socket } from "../libs/socket";
+import CodeEditor from "../components/layout/CodeEditor";
 
 interface ShareaProps {
   text: string;
@@ -26,8 +27,7 @@ const Sharea: React.FC<ShareaProps> = ({ text, setText, userCount }) => {
     };
   }, [roomId, userId]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newText = e.target.value;
+  const handleChange = (newText: string) => {
     setText(newText);
     socket.emit("updateText", { roomId, text: newText });
   };
@@ -43,12 +43,7 @@ const Sharea: React.FC<ShareaProps> = ({ text, setText, userCount }) => {
         {userCount} {userCount === 1 ? "user" : "users"} in room
       </div>
 
-      <textarea
-        value={text}
-        onChange={handleChange}
-        placeholder="Type your text here..."
-        className="w-full px-4 border border-r-4 border-white rounded text-white font-light min-h-dvh bg-cyan"
-      />
+      <CodeEditor text={text} onChange={handleChange} />
 
       <div
         className="text-white absolute bottom-20 right-10 bg-mint p-2 rounded-full shadow-lg shadow-teal hover:cursor-pointer"
