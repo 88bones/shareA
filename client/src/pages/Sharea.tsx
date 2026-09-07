@@ -6,14 +6,14 @@ import { getUserId, socket } from "../libs/socket";
 interface ShareaProps {
   text: string;
   setText: React.Dispatch<React.SetStateAction<string>>;
+  userCount: number;
 }
 
-const Sharea: React.FC<ShareaProps> = ({ text, setText }) => {
+const Sharea: React.FC<ShareaProps> = ({ text, setText, userCount }) => {
   const { params: roomId } = useParams();
 
   const location = useLocation();
   const userId = location.state?.userId ?? getUserId();
-  console.log(userId);
 
   useEffect(() => {
     if (!roomId) return;
@@ -39,6 +39,10 @@ const Sharea: React.FC<ShareaProps> = ({ text, setText }) => {
 
   return (
     <div className="overflow-x-hidden relative">
+      <div className="text-white absolute top-4 right-4 z-10 bg-mint px-3 py-2 rounded-full shadow-lg shadow-teal">
+        {userCount} {userCount === 1 ? "user" : "users"} in room
+      </div>
+
       <textarea
         value={text}
         onChange={handleChange}

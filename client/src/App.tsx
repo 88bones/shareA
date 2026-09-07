@@ -18,6 +18,7 @@ function AppWrapper() {
 
 function App() {
   const [text, setText] = useState<string>("");
+  const [userCount, setUserCount] = useState(0);
 
   useEffect(() => {
     socket.connect();
@@ -38,11 +39,16 @@ function App() {
       setText(typeof update === "string" ? update : update.text);
     });
 
+    socket.on("roomUserCount", ({ count }) => {
+      setUserCount(count);
+    });
+
     return () => {
       socket.off("connect");
       socket.off("disconnect");
       socket.off("connect_error");
       socket.off("updateText");
+      socket.off("roomUserCount");
       socket.disconnect();
     };
   }, []);
@@ -55,7 +61,9 @@ function App() {
         <Route path="/" element={<Home />}></Route>
         <Route
           path="/room/:params"
-          element={<Sharea text={text} setText={setText} />}
+          element={
+            <Sharea text={text} setText={setText} userCount={userCount} />
+          }
         ></Route>
       </Routes>
     </div>
