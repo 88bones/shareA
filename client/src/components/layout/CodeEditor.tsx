@@ -1,12 +1,22 @@
 import { useEffect, useRef } from "react";
 import { EditorView, basicSetup } from "codemirror";
-import { EditorState, StateEffect, StateField } from "@codemirror/state";
+import {
+  ChangeSet,
+  EditorState,
+  StateEffect,
+  StateField,
+} from "@codemirror/state";
 import { Decoration, type DecorationSet, WidgetType } from "@codemirror/view";
 import { socket } from "../../libs/socket";
 
 interface RemoteCursor {
   userId: string;
   position: number;
+}
+
+interface TextUpdate {
+  changes?: ReturnType<ChangeSet["toJSON"]>;
+  text?: string;
 }
 
 class CursorWidget extends WidgetType {
@@ -110,13 +120,20 @@ const CodeEditor = ({ text, onChange, roomId, userId }: CodeEditorProps) => {
             });
           }
 
-          if (
-            update.docChanged &&
-            update.transactions.some((transaction) =>
-              transaction.isUserEvent("input"),
-            )
-          ) {
+          if (update.docChanged) {
             onChangeRef.current(update.state.doc.toString());
+
+            if (
+              update.transactions.some((transaction) =>
+                transaction.isUserEvent("input"),
+              )
+            ) {
+              socket.emit("updateText", {
+                roomId,
+                userId,
+                changes: update.changes.toJSON(),
+              });
+            }
           }
         }),
       ],
@@ -153,12 +170,31 @@ const CodeEditor = ({ text, onChange, roomId, userId }: CodeEditorProps) => {
       });
     };
 
+    const handleTextUpdate = ({ changes, text }: TextUpdate) => {
+      if (changes) {
+        view.dispatch({ changes: ChangeSet.fromJSON(changes) });
+        return;
+      }
+
+      if (typeof text === "string") {
+        view.dispatch({
+          changes: {
+            from: 0,
+            to: view.state.doc.length,
+            insert: text,
+          },
+        });
+      }
+    };
+
     socket.on("cursorPosition", handleCursorPosition);
     socket.on("cursorLeave", handleCursorLeave);
+    socket.on("updateText", handleTextUpdate);
 
     return () => {
       socket.off("cursorPosition", handleCursorPosition);
       socket.off("cursorLeave", handleCursorLeave);
+      socket.off("updateText", handleTextUpdate);
       remoteCursorsRef.current.clear();
       view.destroy();
       viewRef.current = null;

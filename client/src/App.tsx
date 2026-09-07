@@ -6,8 +6,6 @@ import Sharea from "./pages/Sharea";
 import { useEffect, useState } from "react";
 import { socket } from "./libs/socket";
 
-type TextUpdate = string | { text: string };
-
 function AppWrapper() {
   return (
     <BrowserRouter>
@@ -35,10 +33,6 @@ function App() {
       console.error("Socket connection failed:", error.message);
     });
 
-    socket.on("updateText", (update: TextUpdate) => {
-      setText(typeof update === "string" ? update : update.text);
-    });
-
     socket.on("roomUserCount", ({ count }) => {
       setUserCount(count);
     });
@@ -47,7 +41,6 @@ function App() {
       socket.off("connect");
       socket.off("disconnect");
       socket.off("connect_error");
-      socket.off("updateText");
       socket.off("roomUserCount");
       socket.disconnect();
     };
