@@ -43,6 +43,7 @@ io.on("connection", (socket) => {
   socket.on("leaveRoom", async (roomId) => {
     if (!socket.rooms.has(roomId)) return;
 
+    socket.to(roomId).emit("cursorLeave", { userId: socket.data.userId });
     socket.leave(roomId);
     await new Promise((resolve) => setImmediate(resolve));
     emitRoomUserCount(roomId);
@@ -51,6 +52,7 @@ io.on("connection", (socket) => {
   socket.on("disconnecting", () => {
     for (const roomId of socket.rooms) {
       if (roomId !== socket.id) {
+        socket.to(roomId).emit("cursorLeave", { userId: socket.data.userId });
         setImmediate(() => emitRoomUserCount(roomId));
       }
     }
@@ -60,6 +62,10 @@ io.on("connection", (socket) => {
     socket.to(roomId).emit("updateText", {
       text,
     });
+  });
+
+  socket.on("cursorPosition", ({ roomId, userId, position }) => {
+    socket.to(roomId).emit("cursorPosition", { userId, position });
   });
 });
 

@@ -39,11 +39,16 @@ const Sharea: React.FC<ShareaProps> = ({ text, setText, userCount }) => {
 
   return (
     <div className="overflow-x-hidden relative">
-      <div className="text-white absolute top-4 right-4 z-10 bg-mint px-3 py-2 rounded-full shadow-lg shadow-teal">
+      <div className="text-white text-xs absolute top-4 right-2 z-10 bg-mint px-3 py-1 rounded-full shadow-lg shadow-teal">
         {userCount} {userCount === 1 ? "user" : "users"} in room
       </div>
 
-      <CodeEditor text={text} onChange={handleChange} />
+      <CodeEditor
+        text={text}
+        onChange={handleChange}
+        roomId={roomId}
+        userId={userId}
+      />
 
       <div
         className="text-white absolute bottom-20 right-10 bg-mint p-2 rounded-full shadow-lg shadow-teal hover:cursor-pointer"
