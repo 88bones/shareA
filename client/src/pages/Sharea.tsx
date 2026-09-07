@@ -29,7 +29,6 @@ const Sharea: React.FC<ShareaProps> = ({ text, setText, userCount }) => {
 
   const handleChange = (newText: string) => {
     setText(newText);
-    socket.emit("updateText", { roomId, text: newText });
   };
 
   const handleClear = () => {

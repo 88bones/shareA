@@ -58,10 +58,8 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("updateText", ({ roomId, text }) => {
-    socket.to(roomId).emit("updateText", {
-      text,
-    });
+  socket.on("updateText", ({ roomId, changes, text }) => {
+    socket.to(roomId).emit("updateText", { changes, text });
   });
 
   socket.on("cursorPosition", ({ roomId, userId, position }) => {
