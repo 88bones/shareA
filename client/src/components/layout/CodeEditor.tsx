@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { EditorView, basicSetup } from "codemirror";
 import {
+  Annotation,
   ChangeSet,
   EditorState,
   StateEffect,
@@ -18,6 +19,8 @@ interface TextUpdate {
   changes?: ReturnType<ChangeSet["toJSON"]>;
   text?: string;
 }
+
+const remoteOrigin = Annotation.define<boolean>();
 
 class CursorWidget extends WidgetType {
   private readonly userId: string;
@@ -97,6 +100,7 @@ const CodeEditor = ({ text, onChange, roomId, userId }: CodeEditorProps) => {
   const viewRef = useRef<EditorView | null>(null);
   const remoteCursorsRef = useRef(new Map<string, RemoteCursor>());
   const onChangeRef = useRef(onChange);
+  const applyingRemoteText = useRef(false);
 
   useEffect(() => {
     onChangeRef.current = onChange;
@@ -112,7 +116,11 @@ const CodeEditor = ({ text, onChange, roomId, userId }: CodeEditorProps) => {
         remoteCursorsField,
         // javascript({ typescript: true }),
         EditorView.updateListener.of((update) => {
-          if (update.selectionSet || update.docChanged) {
+          const isRemote = update.transactions.some((transaction) =>
+            transaction.annotation(remoteOrigin),
+          );
+
+          if (!isRemote && (update.selectionSet || update.docChanged)) {
             socket.emit("cursorPosition", {
               roomId,
               userId,
@@ -123,11 +131,7 @@ const CodeEditor = ({ text, onChange, roomId, userId }: CodeEditorProps) => {
           if (update.docChanged) {
             onChangeRef.current(update.state.doc.toString());
 
-            if (
-              update.transactions.some((transaction) =>
-                transaction.isUserEvent("input"),
-              )
-            ) {
+            if (!isRemote) {
               socket.emit("updateText", {
                 roomId,
                 userId,
@@ -156,6 +160,7 @@ const CodeEditor = ({ text, onChange, roomId, userId }: CodeEditorProps) => {
       });
       view.dispatch({
         effects: setRemoteCursors.of([...remoteCursorsRef.current.values()]),
+        annotations: remoteOrigin.of(true),
       });
     };
 
@@ -167,23 +172,40 @@ const CodeEditor = ({ text, onChange, roomId, userId }: CodeEditorProps) => {
       remoteCursorsRef.current.delete(remoteUserId);
       view.dispatch({
         effects: setRemoteCursors.of([...remoteCursorsRef.current.values()]),
+        annotations: remoteOrigin.of(true),
       });
     };
 
-    const handleTextUpdate = ({ changes, text }: TextUpdate) => {
+    const handleTextUpdate = ({ changes, text: fullText }: TextUpdate) => {
       if (changes) {
-        view.dispatch({ changes: ChangeSet.fromJSON(changes) });
+        try {
+          const changeSet = ChangeSet.fromJSON(changes);
+
+          if (changeSet.length !== view.state.doc.length) {
+            socket.emit("requestFullSync", { roomId, userId });
+            return;
+          }
+          view.dispatch({
+            changes: changeSet,
+            annotations: remoteOrigin.of(true),
+          });
+        } catch {
+          socket.emit("requestFullSync", { roomId, userId });
+        }
         return;
       }
 
-      if (typeof text === "string") {
+      if (typeof fullText === "string") {
+        applyingRemoteText.current = true;
         view.dispatch({
           changes: {
             from: 0,
             to: view.state.doc.length,
-            insert: text,
+            insert: fullText,
           },
+          annotations: remoteOrigin.of(true),
         });
+        applyingRemoteText.current = false;
       }
     };
 
@@ -204,6 +226,8 @@ const CodeEditor = ({ text, onChange, roomId, userId }: CodeEditorProps) => {
   useEffect(() => {
     const view = viewRef.current;
     if (!view || view.state.doc.toString() === text) return;
+
+    if (applyingRemoteText.current) return;
 
     view.dispatch({
       changes: {
